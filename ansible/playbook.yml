@@ -1,0 +1,40 @@
+- hosts: default
+  tags: ['pre_chroot']
+  vars:
+    world_set:
+      - sys-kernel/gentoo-sources
+      - sys-boot/grub:2
+      - app-admin/sudo
+    accept_keywords:
+      - ">=dev-util/kbuild-0.1.9998.3407 # Workaround for https://bugs.gentoo.org/734354"
+  tasks:
+    - import_tasks: tasks/disks.yml
+    - import_tasks: tasks/stage3.yml
+    - import_tasks: tasks/pre_chroot.yml
+
+- hosts: localhost
+  tags: ['chroot']
+  vars:
+    make_num_jobs: 4
+  tasks:
+    - import_tasks: tasks/kernel.yml
+    - import_tasks: tasks/emerge.yml
+    - import_tasks: tasks/users.yml
+    - import_tasks: tasks/grub.yml
+    - import_tasks: tasks/services.yml
+
+- hosts: default
+  tags: ['post_chroot']
+  tasks:
+    - file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/mnt/gentoo/root/ansible"
+        - "/mnt/gentoo/root/ansible_env"
+        - "/mnt/gentoo/var/db/repos/gentoo"
+        - "/mnt/gentoo/makelog"
+
+    - shell: |
+        sync
+        umount -R /mnt/gentoo
