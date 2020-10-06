@@ -1,0 +1,53 @@
+- name: Create bootloader partition
+  community.general.parted:
+    device: /dev/sda
+    state: present
+    number: 1
+    flags: [ 'boot' ]
+    part_start: "1MB"
+    part_end: "3MB"
+
+- name: Create boot partition
+  community.general.parted:
+    device: /dev/sda
+    state: present
+    number: 2
+    fs_type: ext2
+    part_start: "3MB"
+    part_end: "261MB"
+
+- name: Create root partition
+  community.general.parted:
+    device: /dev/sda
+    state: present
+    number: 3
+    fs_type: ext4
+    part_start: "264MB"
+    part_end: "-1MB"
+
+- name: Create filesystems
+  filesystem:
+    device: "/dev/sda{{ item.number }}"
+    fstype: "{{ item.fstype }}"
+  loop:
+    - { number: 2, fstype: ext2 }
+    - { number: 3, fstype: ext4 }
+
+- name: Mount root
+  mount:
+    state: mounted
+    fstype: ext4
+    src: /dev/sda3
+    path: /mnt/gentoo
+
+- name: Create boot directory
+  file:
+    path: "/mnt/gentoo/boot"
+    state: directory
+
+- name: Mount boot
+  mount:
+    state: mounted
+    fstype: ext4
+    src: /dev/sda2
+    path: /mnt/gentoo/boot

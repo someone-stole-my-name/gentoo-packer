@@ -1,0 +1,6 @@
+*.box
+Vagrantfile
+.vagrant
+packer_*
+output-*
+*.log

@@ -1,0 +1,12 @@
+- name: Create fstab
+  blockinfile:
+    path: /etc/fstab
+    block: |
+      /dev/sda2 /boot ext4 noauto,noatime 1 2
+      /dev/sda3 / ext4 noatime 0 1
+
+- name: Install grub to /dev/sda
+  shell: grub-install /dev/sda >> /makelog
+
+- name: Generate grub configuration file
+  shell: grub-mkconfig -o /boot/grub/grub.cfg >> /makelog

@@ -1,0 +1,13 @@
+- name: Create netifrc symlink
+  file:
+    state: link
+    src: /etc/init.d/net.lo
+    path: /etc/init.d/net.enp0s3
+
+- name: Enable services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  loop: 
+    - sshd
+    - net.enp0s3

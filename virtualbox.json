@@ -1,0 +1,108 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "gentoo-nofb",
+        "<enter>",
+        "<wait10>",
+        "<enter>",
+        "<wait10>",
+        "<wait10>",
+        "<wait10>",
+        "passwd root",
+        "<enter>",
+        "root",
+        "<enter>",
+        "root",
+        "<enter>",
+        "sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config",
+        "<enter>",
+        "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config",
+        "<enter>",
+        "/etc/init.d/sshd start",
+        "<enter>"
+      ],
+      "boot_wait": "5s",
+      "boot_keygroup_interval": "1s",
+      "disk_size": "{{ user `base_disk_size` }}",
+      "guest_additions_mode": "disable",
+      "guest_os_type": "Gentoo_64",
+      "headless": "{{ user `headless` }}",
+      "iso_checksum": "sha512:{{ user `sha_512` }}",
+      "iso_url": "http://distfiles.gentoo.org/releases/amd64/autobuilds/{{ user `stage_3` }}/install-amd64-minimal-{{ user `stage_3` }}.iso",
+      "shutdown_command": "shutdown -hP now",
+      "ssh_password": "root",
+      "ssh_timeout": "20s",
+      "ssh_username": "root",
+      "type": "virtualbox-iso",
+      "vm_name": "Gentoo ({{ build_name }})",
+      "name": ":{{ user `stage_3` }}",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{ .Name }}",
+          "--memory",
+          "{{ user `build_mem` }}"
+        ],
+        [
+          "modifyvm",
+          "{{ .Name }}",
+          "--cpus",
+          "{{ user `build_cpu` }}"
+        ]
+      ],
+      "vboxmanage_post": [
+        [
+          "modifyvm",
+          "{{ .Name }}",
+          "--memory",
+          "{{ user `final_mem` }}"
+        ],
+        [
+          "modifyvm",
+          "{{ .Name }}",
+          "--cpus",
+          "{{ user `final_cpu` }}"
+        ]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "gentoo-amd64-stage3{{ split build_name \":\" 0 }}_{{ .Provider }}.box",
+      "type": "vagrant",
+      "compression_level": 9
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "ansible/playbook.yml",
+      "extra_arguments": [
+        "--extra-vars",
+        "stage_3={{ user `stage_3` }}",
+        "--extra-vars",
+        "stage_3_type={{ split build_name \":\" 0 }}",
+        "--tags",
+        "pre_chroot"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "ansible",
+      "destination": "/mnt/gentoo/root/"
+    },
+    {
+      "type": "shell",
+      "script": "chroot.sh"
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "ansible/playbook.yml",
+      "extra_arguments": [
+        "--tags",
+        "post_chroot"
+      ]
+    }
+  ]
+}
