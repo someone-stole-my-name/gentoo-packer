@@ -1,0 +1,22 @@
+- name: Download stage3-amd64-{{ stage_3 }}.tar.xz to localhost
+  delegate_to: localhost
+  become: no
+  get_url:
+    dest: /tmp/stage3-amd64-{{ stage_3 }}.tar.xz
+    url: "http://distfiles.gentoo.org/releases/amd64/autobuilds/{{ stage_3 }}/stage3-amd64-{{ stage_3 }}.tar.xz"
+
+- name: Copy stage3-amd64-{{ stage_3 }}.tar.xz to VM
+  copy:
+    src: /tmp/stage3-amd64-{{ stage_3 }}.tar.xz
+    dest: "/mnt/gentoo/stage3-amd64-{{ stage_3 }}.tar.xz"
+
+- name: Unpack stage3-amd64-{{ stage_3 }}.tar.xz
+  unarchive:
+    remote_src: yes
+    dest: "/mnt/gentoo"
+    src: "/mnt/gentoo/stage3-amd64-{{ stage_3 }}.tar.xz"
+  
+- name: Delete /mnt/gentoo/stage3-amd64-{{ stage_3 }}.tar.xz
+  file:
+    path: "/mnt/gentoo/stage3-amd64-{{ stage_3 }}.tar.xz"
+    state: absent

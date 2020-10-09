@@ -1,0 +1,12 @@
+- name: Emerge base packages
+  portage:
+    package: '@world'
+    sync: no
+    state: present
+    quiet: yes
+    quietbuild: yes
+    update: yes
+    quietfail: yes
+
+- portage:
+    depclean: yes

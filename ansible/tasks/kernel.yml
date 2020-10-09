@@ -1,0 +1,21 @@
+- name: Emerge gentoo-sources
+  portage:
+    package: sys-kernel/gentoo-sources
+    sync: no
+    state: present
+    quiet: yes
+    quietbuild: yes
+    quietfail: yes
+
+- name: Compile kernel
+  shell: |
+    cd /usr/src/linux
+    zcat /proc/config.gz > .config
+    make localyesconfig
+    make -j{{ make_num_jobs }} >> /makelog
+
+- name: Install kernel
+  shell: |
+    cd /usr/src/linux
+    make modules_install >> /makelog
+    make install >> /makelog

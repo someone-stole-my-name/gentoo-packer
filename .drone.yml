@@ -1,0 +1,39 @@
+---
+kind: pipeline
+type: ssh
+name: default
+
+concurrency:
+  limit: 1
+
+server:
+  host: 192.168.1.4
+  user: drone
+  password:
+    from_secret: drone_ssh_password
+
+steps:
+- name: Build Box
+  commands:
+    - ansible-galaxy collection install community.general
+    - /bin/bash build.sh
+
+- name: Test Box
+  commands:
+    - "vagrant box remove ./gentoo-amd64-stage3_virtualbox.box --force --all || :"
+    - "vagrant destroy --force || :"
+    - vagrant up
+    - vagrant ssh -c whoami
+
+- name: Push to Vagrant Cloud
+  environment:
+    VAGRANT_CLOUD_TOKEN:
+      from_secret: VAGRANT_CLOUD_TOKEN
+  commands:
+    - vagrant cloud auth login --token ${VAGRANT_CLOUD_TOKEN}
+    - vagrant cloud publish chn2guevara/gentoo ${DRONE_TAG} virtualbox gentoo-amd64-stage3_virtualbox.box --release
+  when:
+    branch: 
+      - master
+    event:
+      - tag

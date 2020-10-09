@@ -1,0 +1,20 @@
+- name: Add users
+  user:
+    name: "{{ user.name }}"
+    password: "{{ user.password }}"
+  loop:
+    - { name: vagrant, password: "{{ 'vagrant' | password_hash('sha512') }}" }
+    - { name: root, password: "{{ 'vagrant' | password_hash('sha512') }}" }
+  loop_control:
+    loop_var: user
+
+- name: Add Vagrant insecure SSH key
+  authorized_key:
+    user: vagrant
+    state: present
+    key: https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub
+
+- name: Grant privileges to vagrant user
+  lineinfile:
+    dest: /etc/sudoers
+    line: "vagrant ALL=(ALL) NOPASSWD: ALL"

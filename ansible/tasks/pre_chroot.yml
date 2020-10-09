@@ -1,0 +1,57 @@
+- name: Mount pseudo filesystem
+  mount:
+    state: mounted
+    src: "{{ item.src }}"
+    path: "{{ item.dest }}"
+    opts: "{{ item.opts }}"
+    fstype: "{{ item.fstype }}"
+  loop:
+    - { src: proc, dest: "/mnt/gentoo/proc", opts: "rw,relatime" , fstype: proc }
+    - { src: /sys, dest: "/mnt/gentoo/sys", opts: "rslave,rbind", fstype: none }
+    - { src: /dev, dest: "/mnt/gentoo/dev", opts: "rslave,rbind", fstype: none }
+
+- name: Copy resolv.conf to chroot
+  copy:
+    remote_src: yes
+    src: /etc/resolv.conf
+    dest: /mnt/gentoo/etc/resolv.conf
+    mode: u+rw,o+r,g+r
+    owner: root
+    group: root
+
+- name: Copy make.conf template
+  copy:
+    dest: /mnt/gentoo/etc/portage/make.conf
+    group: portage
+    owner: root
+    mode: u+rw,g+r,o+r
+    content: |
+      CFLAGS="-march=native -O2 -pipe"
+      CXXFLAGS="${CFLAGS}"
+      CHOST="x86_64-pc-linux-gnu"
+      GRUB_PLATFORMS="pc"
+      PORTDIR="/var/db/repos/gentoo"
+      DISTDIR="/var/cache/distfiles"
+      PKGDIR="/var/cache/packages"
+
+- name: Copy package.accept_keywords template
+  copy:
+    dest: /mnt/gentoo/etc/portage/package.accept_keywords
+    group: portage
+    owner: root
+    mode: u+rw,g+r,o+r
+    content: |
+      {% for atom in accept_keywords %}
+      {{ atom }}
+      {% endfor %}
+
+- name: Create world set
+  copy:
+    dest: /mnt/gentoo/var/lib/portage/world
+    group: portage
+    owner: root
+    mode: u+rw,g+r,o+r
+    content: |
+      {% for atom in world_set %}
+      {{ atom }}
+      {% endfor %}
