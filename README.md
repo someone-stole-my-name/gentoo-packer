@@ -1,4 +1,4 @@
-# Gentoo - Virtualbox Vagrant Box
+# Gentoo - Virtualbox Vagrant Box [![Build Status](https://cd.christiansegundo.com/api/badges/someone-stole-my-name/gentoo-packer/status.svg)](https://cd.christiansegundo.com/someone-stole-my-name/gentoo-packer)
 
 This is a minimal stage3 installation of Gentoo.
 
