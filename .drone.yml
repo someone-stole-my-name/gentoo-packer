@@ -31,7 +31,7 @@ steps:
     VAGRANT_CLOUD_TOKEN:
       from_secret: VAGRANT_CLOUD_TOKEN
   commands:
-    - vagrant cloud publish chn2guevara/gentoo $DRONE_TAG virtualbox gentoo-amd64-stage3_virtualbox.box --release --no-tty --force
+    - vagrant cloud publish chn2guevara/gentoo $DRONE_TAG virtualbox gentoo-amd64-stage3_virtualbox.box --release --no-tty --force --debug
   when:
     event:
       - tag

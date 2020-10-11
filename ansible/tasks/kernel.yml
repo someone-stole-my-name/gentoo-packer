@@ -6,6 +6,7 @@
     quiet: yes
     quietbuild: yes
     quietfail: yes
+    oneshot: yes
 
 - name: Compile kernel
   shell: |

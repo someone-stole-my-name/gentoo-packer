@@ -2,7 +2,6 @@
   tags: ['pre_chroot']
   vars:
     world_set:
-      - sys-kernel/gentoo-sources
       - sys-boot/grub:2
       - app-admin/sudo
     accept_keywords:
@@ -33,6 +32,7 @@
         - "/mnt/gentoo/root/ansible"
         - "/mnt/gentoo/root/ansible_env"
         - "/mnt/gentoo/var/db/repos/gentoo"
+        - "/mnt/gentoo/usr/src"
         - "/mnt/gentoo/makelog"
 
     - shell: |
